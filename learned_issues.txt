@@ -1,0 +1,29 @@
+# Learned Issues & Solutions
+
+## API Endpoints
+- **Issue:** The starter code pointed to `api.elections.kalshi.com`.
+- **Confusion:** We weren't sure if this endpoint supported sports/general markets or just politics.
+- **Resolution:** `api.elections.kalshi.com/trade-api/v2` *is* the correct V2 production endpoint for all markets (Sports, Weather, etc.), despite the "elections" subdomain.
+
+## Ticker Naming Conventions
+- **Issue:** Finding specific markets (e.g., "Wisconsin vs Penn State") by guessing tickers or using web URLs failed.
+- **Discovery:** Web URLs often simplify tickers (lowercase, dashes). API tickers are strict:
+    - **Format:** `SERIES-DATE-MATCHUP-SIDE`
+    - **Example:** `KXNCAAMBGAME-26JAN22WISPSU-WIS`
+    - **Case Sensitivity:** Tickers must be ALL UPPERCASE.
+- **Sides:** Binary markets for games are often split into two separate tickers (one for each team), suffixed with `-TEAMCODE` (e.g., `-WIS` and `-PSU`).
+
+## Market Search & Filtering
+- **Issue:** `get_markets(limit=100)` returned mostly "Parlay/Combo" markets (`KXMVESPORTS...`), pushing simple game markets thousands of items down the list.
+- **Issue:** `get_markets(event_ticker="...")` failed because the `event_ticker` filter is strict and we didn't know the exact internal event ID.
+- **Solution:** 
+    1.  Use `get_series()` to find the correct **Series Ticker** (e.g., `KXNCAAMBGAME`).
+    2.  Use `get_markets(series_ticker="KXNCAAMBGAME")` to list all markets within that specific sport/category.
+    3.  Filter the results locally for specific team abbreviations (e.g., "WIS", "PSU").
+
+## Authentication
+- **Observation:** Both the "Starter Code" (RSA Keys) and "API Key" methods interact with the same endpoints. The `clients.py` RSA method works perfectly for V2.
+
+## "Not Found" Errors
+- **Cause:** Searching for a market by `ticker` returns 404 if the ticker string is not an *exact* character-for-character match (including case and suffixes).
+- **Fix:** Always search/scan a Series first to find the exact ticker string before calling `get_market()`.

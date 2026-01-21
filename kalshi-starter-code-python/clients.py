@@ -172,6 +172,100 @@ class KalshiHttpClient(KalshiBaseClient):
         params = {k: v for k, v in params.items() if v is not None}
         return self.get(self.markets_url + '/trades', params=params)
 
+    # --- New Methods ported from ExchangeClient ---
+
+    def get_markets(
+        self,
+        limit: Optional[int] = None,
+        cursor: Optional[str] = None,
+        event_ticker: Optional[str] = None,
+        series_ticker: Optional[str] = None,
+        max_close_ts: Optional[int] = None,
+        min_close_ts: Optional[int] = None,
+        status: Optional[str] = None,
+        tickers: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Retrieves a list of markets."""
+        params = {k: v for k, v in locals().items() if k != 'self' and v is not None}
+        return self.get(self.markets_url, params=params)
+
+    def get_market(self, ticker: str) -> Dict[str, Any]:
+        """Retrieves details for a specific market."""
+        return self.get(self.markets_url + '/' + ticker)
+
+    def get_series(self, series_ticker: str) -> Dict[str, Any]:
+        """Retrieves details for a specific series."""
+        return self.get("/trade-api/v2/series/" + series_ticker)
+
+    def get_orderbook(self, ticker: str, depth: Optional[int] = None) -> Dict[str, Any]:
+        """Retrieves the orderbook for a market."""
+        params = {'depth': depth} if depth else {}
+        return self.get(self.markets_url + '/' + ticker + '/orderbook', params=params)
+
+    def create_order(
+        self,
+        ticker: str,
+        client_order_id: str,
+        side: str,
+        action: str,
+        count: int,
+        type: str,
+        yes_price: Optional[int] = None,
+        no_price: Optional[int] = None,
+        expiration_ts: Optional[int] = None,
+        sell_position_floor: Optional[int] = None,
+        buy_max_cost: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Creates a new order."""
+        body = {k: v for k, v in locals().items() if k != 'self' and v is not None}
+        return self.post(self.portfolio_url + '/orders', body=body)
+
+    def cancel_order(self, order_id: str) -> Dict[str, Any]:
+        """Cancels a specific order."""
+        return self.delete(self.portfolio_url + '/orders/' + order_id)
+
+    def get_orders(
+        self,
+        ticker: Optional[str] = None,
+        event_ticker: Optional[str] = None,
+        min_ts: Optional[int] = None,
+        max_ts: Optional[int] = None,
+        limit: Optional[int] = None,
+        cursor: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Retrieves a list of orders."""
+        params = {k: v for k, v in locals().items() if k != 'self' and v is not None}
+        return self.get(self.portfolio_url + '/orders', params=params)
+
+    def get_order(self, order_id: str) -> Dict[str, Any]:
+        """Retrieves a specific order."""
+        return self.get(self.portfolio_url + '/orders/' + order_id)
+
+    def get_fills(
+        self,
+        ticker: Optional[str] = None,
+        order_id: Optional[str] = None,
+        min_ts: Optional[int] = None,
+        max_ts: Optional[int] = None,
+        limit: Optional[int] = None,
+        cursor: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Retrieves a list of fills (completed trades)."""
+        params = {k: v for k, v in locals().items() if k != 'self' and v is not None}
+        return self.get(self.portfolio_url + '/fills', params=params)
+
+    def get_positions(
+        self,
+        limit: Optional[int] = None,
+        cursor: Optional[str] = None,
+        settlement_status: Optional[str] = None,
+        ticker: Optional[str] = None,
+        event_ticker: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Retrieves current portfolio positions."""
+        params = {k: v for k, v in locals().items() if k != 'self' and v is not None}
+        return self.get(self.portfolio_url + '/positions', params=params)
+
 class KalshiWebSocketClient(KalshiBaseClient):
     """Client for handling WebSocket connections to the Kalshi API."""
     def __init__(

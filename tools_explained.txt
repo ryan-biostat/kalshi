@@ -1,0 +1,56 @@
+# My Kalshi Tools - Function Guide
+
+This file explains the purpose and usage of each custom function in `my_kalshi_tools.py`.
+
+## 1. get_initialized_client()
+- **Purpose:** Handles all the setup required to talk to Kalshi. It loads your API credentials from the hidden `.env` file and uses your private RSA key to authenticate.
+- **Returns:** An authenticated `KalshiHttpClient` object.
+- **Usage:**
+  ```python
+  client = get_initialized_client()
+  ```
+
+## 2. find_game_in_series(client, series_ticker, search_terms)
+- **Purpose:** A helper function used to search for specific markets within a larger Series.
+- **How it works:** It paginates through all markets in a series (like `KXNBAGAME`) and returns only those whose **Ticker** contains *all* the provided search terms.
+- **Arguments:**
+  - `series_ticker`: The ID of the series (e.g., `"KXNCAAMBGAME"`).
+  - `search_terms`: A list of strings to look for (e.g., `["WIS", "PSU"]`).
+- **Returns:** A list of matching ticker strings.
+
+## 3. get_market_odds(client, ticker)
+- **Purpose:** Fetches and prints the standard "Yes" price and volume for a single market.
+- **Output:** A clean summary showing the Market Title, Ticker, Yes Price, and Total Volume.
+- **Usage:**
+  ```python
+  get_market_odds(client, "KXNBAGAME-26JAN21OKCMIL-OKC")
+  ```
+
+## 4. get_binary_outcomes(client, series_ticker, team1, team2)
+- **Purpose:** The "Head-to-Head" tool. Finds a specific game between two teams and prints the odds for both sides.
+- **When to use:** For regular season games in sports (NBA, NCAA, MLB, etc.).
+- **Arguments:**
+  - `team1`, `team2`: Abbreviations or names of the teams (e.g., `"LAL"`, `"BOS"`).
+- **Example:**
+  ```python
+  get_binary_outcomes(client, "KXNBAGAME", "LAL", "BOS")
+  ```
+
+## 5. get_series_outcomes(client, series_ticker, filter_extremes=True)
+- **Purpose:** The "Futures" tool. Lists all possible winners for a Championship or complex event, sorted by probability.
+- **When to use:** For events with many outcomes, like "Super Bowl Winner", "Next President", or "Who will Trump meet?".
+- **Features:**
+  - Automatically sorts favorites to the top.
+  - `filter_extremes=True`: Hides outcomes with <1% or >99% probability to reduce noise.
+- **Example:**
+  ```python
+  get_series_outcomes(client, "KXNFLNFCCHAMP")
+  ```
+
+## 6. get_market_probability(client, ticker)
+- **Purpose:** The "Drill Down" tool. Gives the exact "Yes" AND "No" prices for a specific market ID.
+- **When to use:** When you have a specific Ticker ID and want to see the exact spread or cost for both sides.
+- **Example:**
+  ```python
+  get_market_probability(client, "KXTRUMPMEET-26JAN-VZEL")
+  ```
